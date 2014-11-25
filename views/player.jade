@@ -1,0 +1,16 @@
+div(ng-controller='PlayerCtrl')
+  div#player
+    div#ytplayer
+    //img#cover
+    button(ng-click='prev()') Prev
+    button(ng-click='isPaused = !isPaused') {{btnPlayText}}
+    button(ng-click='next()') Next
+    input(type='range', min='0', max='100', ng-model="volume")
+    select(ng-model='mode')
+      option repeat
+      option repeatone
+    div
+      input(type='range', min='0', max='{{maxTime}}', ng-model="currentTime")
+    div {{currentSongName}}
+    div {{displayTime}}
+    div {{playlist.title}} {{1+currentSong.mod(playlist.songs.length)}}/{{playlist.songs.length}}

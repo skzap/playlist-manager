@@ -1,0 +1,5 @@
+div(ng-controller='MenuCtrl')
+  input(ng-model='search', type='text', placeholder='Search songs ...')
+  ul.menu
+    li(ng-repeat='playlist in playlists', ui-on-Drop='onDrop($event,$data,playlist)')
+      a(href='/pl/{{playlist.pid}}') {{playlist.title}}
