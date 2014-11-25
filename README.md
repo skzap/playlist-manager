@@ -2,7 +2,7 @@
 
 Create playlists with songs coming from :
 - YouTube
-- Local mp3s in /public/library/ and sub-directies
+- Local mp3s in /public/library/ and sub-directories
 - External mp3s
 
 ## How to use
