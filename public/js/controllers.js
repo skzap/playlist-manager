@@ -106,14 +106,14 @@ angular.module('myApp.controllers', []).
       $scope.btnPlayText = 'Pause';
     });
 
-    // $scope.$on('UpdatedPlaylist', function(event, playlistId) {
-    //   if ($scope.playlist != null && $scope.playlist.pid == playlistId) {
-    //     $http.get('/api/playlist/'+playlistId).
-    //       success(function(playlist) {
-    //         $scope.playlist = playlist;
-    //       });
-    //   }
-    // });
+    $scope.$on('UpdatedPlaylist', function(event, playlistId) {
+      if ($scope.playlist != null && $scope.playlist.pid == playlistId) {
+        $http.get('/api/playlist/'+playlistId).
+          success(function(playlist) {
+            $scope.playlist = playlist;
+          });
+      }
+    });
 
     // User Controls
     $scope.next = function() {
@@ -146,6 +146,10 @@ angular.module('myApp.controllers', []).
       default:
       }
     };
+    $scope.$watch('videoWidth', function() {
+      var videoHeight = $scope.videoWidth*9/16;
+      ytplayer.embedPlayer.setSize($scope.videoWidth, videoHeight);
+    });
     $scope.$watch('currentSong', function() {
       playSong();
     });

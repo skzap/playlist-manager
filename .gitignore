@@ -16,3 +16,5 @@ Desktop.ini
 node_modules
 *.log
 *.gz
+
+db.json

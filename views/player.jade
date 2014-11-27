@@ -14,3 +14,4 @@ div(ng-controller='PlayerCtrl')
     div {{currentSongName}}
     div {{displayTime}}
     div {{playlist.title}} {{1+currentSong.mod(playlist.songs.length)}}/{{playlist.songs.length}}
+    input(type='range', min='0', max='1080', ng-model="videoWidth")
