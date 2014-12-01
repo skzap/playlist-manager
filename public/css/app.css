@@ -35,6 +35,14 @@
   right: 0px;
 }
 
+#scplayer {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 355px;
+  height: 200px;
+}
+
 #player {
   margin-bottom: 20px;
   background-color: #EEE;

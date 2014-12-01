@@ -94,10 +94,11 @@ angular.module('myApp.controllers', []).
         });
     };
   }).
-  controller('PlayerCtrl', function ($scope, $http, $window, htmlplayer, ytplayer, torrentclient) {
+  controller('PlayerCtrl', function ($scope, $http, $window, htmlplayer, ytplayer, scplayer) {
     ytplayer.insertScript();
     $scope.mode = 'repeat';
     $scope.volume = 100;
+    $scope.videoWidth = 355;
     $scope.$on('PlayPlaylist', function(event, message) {
       //torrentclient.testDownload();
       $scope.playlist = message.playlist;
@@ -146,9 +147,20 @@ angular.module('myApp.controllers', []).
       default:
       }
     };
+    $scope.getCurrentSong = function() {
+      if ($scope.playlist == null)
+        return false;
+
+      var songIndex = $scope.currentSong % $scope.playlist.songs.length;
+      while (songIndex<0)
+        songIndex += $scope.playlist.songs.length;
+      return $scope.playlist.songs[songIndex];
+    };
     $scope.$watch('videoWidth', function() {
-      var videoHeight = $scope.videoWidth*9/16;
-      ytplayer.embedPlayer.setSize($scope.videoWidth, videoHeight);
+      if ($scope.videoWidth != null && ytplayer.embedPlayer != null) {
+        var videoHeight = $scope.videoWidth*9/16;
+        ytplayer.embedPlayer.setSize($scope.videoWidth, videoHeight);
+      }
     });
     $scope.$watch('currentSong', function() {
       playSong();
@@ -166,8 +178,10 @@ angular.module('myApp.controllers', []).
       setVolume($scope.volume);
     });
     $scope.$watch('currentTime', function(curtime, oldtime) {
-      if (Math.abs(curtime-oldtime) > 2)
+      if (Math.abs(curtime-oldtime) > 2 && (curtime==0 || curtime>=1)) {
+        console.log('Time jump from '+oldtime+' to '+curtime);
         setSongTime(curtime);
+      }
     });
     $scope.$watch(function () {
       return getFormattedTime($scope.currentTime, $scope.maxTime);
@@ -190,7 +204,8 @@ angular.module('myApp.controllers', []).
     $scope.$watch(function () {
       return htmlplayer.audioElement.currentTime;
     }, function(curtime, oldtime) {
-      $scope.currentTime = curtime;
+      if ($scope.getCurrentSong().type == 'library' || $scope.getCurrentSong().type == 'external')
+        $scope.currentTime = curtime;
     });
 
     // Youtube Controls
@@ -203,18 +218,41 @@ angular.module('myApp.controllers', []).
     $scope.$watch(function () {
       return ytplayer.duration;
     }, function(newMaxTime) {
-      $scope.maxTime = newMaxTime;
+      setSongDuration();
     });
     $scope.$watch(function () {
       return ytplayer.currentTime;
     }, function(curtime, oldtime) {
-      $scope.currentTime = curtime;
+      if ($scope.getCurrentSong().type == 'youtube')
+        $scope.currentTime = curtime;
+    });
+
+    // Soundcloud Controls
+    $scope.$watch(function () {
+      return scplayer.ended;
+    }, function(ended) {
+      if (ended)
+        $scope.next();
+    });
+    $scope.$watch(function () {
+      return scplayer.duration;
+    }, function(newMaxTime) {
+      setSongDuration();
+    });
+    $scope.$watch(function () {
+      return scplayer.currentTime;
+    }, function(curtime, oldtime) {
+      if ($scope.getCurrentSong().type == 'soundcloud')
+        $scope.currentTime = curtime;
     });
 
     function pauseSong() {
-      switch (getCurrentSong().type) {
+      switch ($scope.getCurrentSong().type) {
       case 'youtube':
         ytplayer.embedPlayer.pauseVideo();
+        break;
+      case 'soundcloud':
+        scplayer.embedPlayer.pause();
         break;
       case 'library':
       case 'external':
@@ -225,9 +263,12 @@ angular.module('myApp.controllers', []).
     }
 
     function resumeSong() {
-      switch (getCurrentSong().type) {
+      switch ($scope.getCurrentSong().type) {
       case 'youtube':
         ytplayer.embedPlayer.playVideo();
+        break;
+      case 'soundcloud':
+        scplayer.embedPlayer.play();
         break;
       case 'library':
       case 'external':
@@ -240,21 +281,24 @@ angular.module('myApp.controllers', []).
     function playSong() {
       if ($scope.playlist != undefined) {
         stopAllPlayers();
-        switch (getCurrentSong().type) {
+        switch ($scope.getCurrentSong().type) {
         case 'youtube':
-          ytplayer.loadVideoById(getCurrentSong().videoId);
+          ytplayer.loadVideoById($scope.getCurrentSong().videoId);
+          break;
+        case 'soundcloud':
+          scplayer.playUrl($scope.getCurrentSong().url);
           break;
         case 'library':
-          htmlplayer.loadAndPlay('/library/' + getCurrentSong().path);
+          htmlplayer.loadAndPlay('/library/' + $scope.getCurrentSong().path);
           $scope.maxTime = Math.round(htmlplayer.audioElement.duration);
           break;
         case 'external':
-          htmlplayer.loadAndPlay(getCurrentSong().url);
+          htmlplayer.loadAndPlay($scope.getCurrentSong().url);
           $scope.maxTime = Math.round(htmlplayer.audioElement.duration);
           break;
         default:
         }
-        $scope.currentSongName = getCurrentSong().name;
+        $scope.currentSongName = $scope.getCurrentSong().name;
         $window.document.title = $scope.currentSongName;
         $scope.isPaused = false;
       }
@@ -265,25 +309,21 @@ angular.module('myApp.controllers', []).
         ytplayer.embedPlayer.pauseVideo();
         ytplayer.embedPlayer.stopVideo();
       }
+      if (scplayer.embedPlayer != undefined) {
+        scplayer.embedPlayer.pause();
+      }
       if (htmlplayer.audioElement != undefined) {
         htmlplayer.pause();
       }
     }
 
-    function getCurrentSong() {
-      if ($scope.playlist == null)
-        return false;
-
-      var songIndex = $scope.currentSong % $scope.playlist.songs.length;
-      while (songIndex<0)
-        songIndex += $scope.playlist.songs.length;
-      return $scope.playlist.songs[songIndex];
-    }
-
     function setSongDuration() {
-      switch (getCurrentSong().type) {
+      switch ($scope.getCurrentSong().type) {
       case 'youtube':
         $scope.maxTime = Math.round(ytplayer.getDuration());
+        break;
+      case 'soundcloud':
+        $scope.maxTime = Math.round(scplayer.duration);
         break;
       case 'library':
       case 'external':
@@ -296,12 +336,16 @@ angular.module('myApp.controllers', []).
     function setVolume(volume) {
       ytplayer.setVolume(volume);
       htmlplayer.setVolume(volume);
+      scplayer.setVolume(volume)
     }
 
     function setSongTime(currentTime) {
-      switch (getCurrentSong().type) {
+      switch ($scope.getCurrentSong().type) {
       case 'youtube':
         ytplayer.embedPlayer.seekTo(currentTime);
+        break;
+      case 'soundcloud':
+        scplayer.embedPlayer.seekTo(currentTime*1000);
         break;
       case 'library':
       case 'external':

@@ -46,37 +46,83 @@ angular.module('myApp.services', []).
 
     return htmlplayer;
   }]).
+  factory('scplayer', ['$document', '$rootScope', function ($document, $rootScope) {
+    var scplayer = {
+      embedPlayer: null,
+      isLoaded: false,
+      isPaused: true,
+      duration: 0,
+      currentTime: 0,
+      ended: false,
+      playUrl: function(scurl) {
+        if (this.isLoaded) {
+          var options = {auto_play: true, buying: false};
+          this.embedPlayer.load(scurl, options);
+        }
+        else {
+          this.loadPlayer(scurl);
+        }
+        this.currentTime = 0;
+      },
+      loadPlayer: function (scurl) {
+        var iframe = document.querySelector('#scplayer');
+        iframe.src = 'https://w.soundcloud.com/player/?buying=false&auto_play=true&url='+scurl;
+        this.embedPlayer = SC.Widget(iframe);
+        this.embedPlayer.bind(SC.Widget.Events.READY, function() {
+          scplayer.embedPlayer.bind(SC.Widget.Events.PLAY, function() {
+            scplayer.isPaused = false;
+            scplayer.embedPlayer.getDuration(function(milliseconds) {
+              scplayer.duration = milliseconds/1000;
+            });
+            scplayer.ended = false;
+          });
+          scplayer.embedPlayer.bind(SC.Widget.Events.PAUSE, function() {
+            scplayer.isPaused = true;
+          });
+          scplayer.embedPlayer.bind(SC.Widget.Events.FINISH, function() {
+            scplayer.ended = true;
+          });
+          scplayer.embedPlayer.bind(SC.Widget.Events.PLAY_PROGRESS, function(object) {
+            scplayer.currentTime = object.currentPosition/1000;
+          });
+        });
+        this.isLoaded = true;
+        console.log('Soundcloud Player Loaded');
+      },
+      setVolume: function(volume) {
+        if (this.isLoaded)
+          this.embedPlayer.setVolume(volume/100);
+      }
+    };
+    return scplayer;
+  }]).
   factory('ytplayer', ['$window', '$rootScope', '$interval', function ($window, $rootScope, $interval) {
     var ytplayer = {
-      "embedPlayer":null,
-      "videoId":null,
-      "height":200,
-      "width":355,
-      "isReady": false,
-      "isPaused": true,
-      "duration": 0,
-      "currentTime": 0,
-      "ended": false,
+      embedPlayer: null,
+      videoId: null,
+      isReady: false,
+      isPaused: true,
+      duration: 0,
+      currentTime: 0,
+      ended: false,
       loadPlayer: function () {
         this.embedPlayer = new YT.Player('ytplayer', {
-          height: this.height,
-          width: this.width,
           videoId: this.videoId,
           events: {
-            'onReady': onYoutubeReady,
-            'onStateChange': onYoutubeStateChange
+            onReady: onYoutubeReady,
+            onStateChange: onYoutubeStateChange
           },
           playerVars: {
-            'controls': 0,
-            'iv_load_policy': 3,
-            'rel': 0,
-            'showinfo': 0,
-            'theme': 'light'
+            controls: 0,
+            iv_load_policy: 3,
+            rel: 0,
+            showinfo: 0
           }
         });
       },
       loadVideoById: function(id) {
         this.embedPlayer.loadVideoById(id);
+        this.currentTime = 0;
       },
       getDuration: function() {
         return this.embedPlayer.getDuration();
@@ -112,6 +158,7 @@ angular.module('myApp.services', []).
       $rootScope.$apply();
     }
     function onYoutubeReady (event) {
+      ytplayer.embedPlayer.setSize(355, 200);
       console.log('Youtube player ready');
     }
     $interval(function () {

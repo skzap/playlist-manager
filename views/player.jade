@@ -1,6 +1,7 @@
 div(ng-controller='PlayerCtrl')
-  div#player
-    div#ytplayer
+  div(ng-show='playlist != null')#player
+    iframe(ng-show='getCurrentSong().type == \'youtube\'', src='http://www.youtube.com/embed/?enablejsapi=1&controls=0&showinfo=0&iv_load_policy=3&rel=3')#ytplayer
+    iframe(ng-show='getCurrentSong().type == \'soundcloud\'')#scplayer
     //img#cover
     button(ng-click='prev()') Prev
     button(ng-click='isPaused = !isPaused') {{btnPlayText}}
