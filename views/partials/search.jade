@@ -6,6 +6,6 @@ section
       div(ng-switch-when='1') 1 song
       div(ng-switch-default) {{playlist.songs.length}} songs 
   ul
-    li(ng-repeat='song in playlist.songs', ui-draggable='true', drag="song")
+    li(ng-repeat='song in playlist.songs', ui-draggable='true', drag="song", ng-dblclick="playlist.playPlaylist($index)")
       button(ng-click='playlist.playPlaylist($index)') Play
       {{song.type}} {{song.name}} 
