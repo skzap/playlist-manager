@@ -152,18 +152,12 @@ exports.deleteSongFromPlaylist = function (req, res) {
     }
   }
 };
-// exports.search.youtube
-// exports.search.soundcloud
-// exports.search.library
-exports.search = function (req, res) {
-  // maybe split this in different calls so that data is served whenever its ready
+
+exports.searchLibrary = function (req, res) {
   var query = req.params.query.toLowerCase();
+  var songs = [];
   var queryWords = query.split(' ');
-  var playlist = {
-    title: 'Search results: ' + query,
-    songs: []
-  };
-  // 1 - search in local library
+
   for (var i = 0; i < data.library.length; i++) {
     var occurences = 0;
     for (var y = 0; y < queryWords.length; y++) {
@@ -172,29 +166,40 @@ exports.search = function (req, res) {
       }
     }
     if (occurences == queryWords.length) {
-      playlist.songs.push({
+      songs.push({
         type: 'library',
         name: data.library[i].name,
         path: data.library[i].path
       });
     }
   }
-  // 2 - search 3rd parties (youtube,etc)
+  res.json(songs);
+};
+
+exports.searchSoundcloud = function (req, res) {
+  var query = req.params.query.toLowerCase();
+  var songs = [];
   var url = "http://api.soundcloud.com/tracks.json?client_id=YOUR_CLIENT_ID&q=" + query;
   request(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       var results = JSON.parse(body);
       for (var i = 0; i < results.length; i++) {
-        playlist.songs.push({
+        songs.push({
           "type": "soundcloud",
           "name": results[i].title,
           "url": results[i].permalink_url
         });
       }
+      res.json(songs);
     } else {
       console.log(error);
     }
   });
+};
+
+exports.searchYoutube = function (req, res) {
+  var query = req.params.query.toLowerCase();
+  var songs = [];
   var url = "https://gdata.youtube.com/feeds/api/videos/?alt=json&q=" + query;
   request(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {
@@ -204,14 +209,14 @@ exports.search = function (req, res) {
         for (var i = 0; i < results.length; i++) {
           var regExResult = results[i].id.$t.match(myregexp);
           var videoId = regExResult[1];
-          playlist.songs.push({
+          songs.push({
             "type": "youtube",
             "name": results[i].title.$t,
             "videoId": videoId
           });
         }
       }
-      res.json(playlist);
+      res.json(songs);
     } else {
       console.log(error);
     }

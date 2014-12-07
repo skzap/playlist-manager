@@ -22,16 +22,36 @@ angular.module('myApp.controllers', []).
     }
   }).
   controller('SearchCtrl', function ($scope, $rootScope, $http, $routeParams) {
-    $http.get('/api/search/'+$routeParams.query).
-      success(function(playlist){
-        playlist.playPlaylist = function (index) {
-          var message = {
-            playlist: playlist,
-            index: index
+    var playlist = {
+      title: 'Search results : '+$routeParams.query,
+      songs: []
+    }
+    playlist.playPlaylist = function (index) {
+      var message = {
+        playlist: playlist,
+        index: index
+      }
+      $rootScope.$broadcast('PlayPlaylist', message);
+    }
+    $scope.playlist = playlist;
+
+    $http.get('/api/search/library/'+$routeParams.query).
+        success(function(songs){
+          for (var i = 0; i < songs.length; i++) {
+            $scope.playlist.songs.push(songs[i]);
           }
-          $rootScope.$broadcast('PlayPlaylist', message);
+        });
+    $http.get('/api/search/soundcloud/'+$routeParams.query).
+      success(function(songs){
+        for (var i = 0; i < songs.length; i++) {
+          $scope.playlist.songs.push(songs[i]);
         }
-        $scope.playlist = playlist;
+      });
+    $http.get('/api/search/youtube/'+$routeParams.query).
+      success(function(songs){
+        for (var i = 0; i < songs.length; i++) {
+          $scope.playlist.songs.push(songs[i]);
+        }
       });
   }).
   controller('PlaylistCtrl', function ($scope, $rootScope, $http, $routeParams) {

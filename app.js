@@ -58,7 +58,10 @@ app.get('/api/playlist/:id/swap/:songId', api.swap);
 app.post('/api/playlist/:id', api.addSongToPlaylist);
 app.post('/api/playlist/addFromURL/:id', api.addSongToPlaylistFromURL);
 app.delete('/api/playlist/:id/:songid', api.deleteSongFromPlaylist);
-app.get('/api/search/:query', api.search);
+
+app.get('/api/search/library/:query', api.searchLibrary);
+app.get('/api/search/soundcloud/:query', api.searchSoundcloud);
+app.get('/api/search/youtube/:query', api.searchYoutube);
 
 // redirect all others to the index (HTML5 history)
 app.get('*', routes.index);
