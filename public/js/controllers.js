@@ -14,10 +14,36 @@ angular.module('myApp.controllers', []).
         $location.path('/search/'+$scope.search);
     });
 
-    $scope.onDrop = function($event,$data,playlist){
-      $http.post('/api/playlist/'+playlist.pid, $data).
+    $scope.$on('DeletedPlaylist', function(event, playlistId) {
+      for (var i = 0; i < $scope.playlists.length; i++) {
+        if ($scope.playlists[i].pid == playlistId) {
+          $scope.playlists.splice(i, 1);
+        }
+      }
+    });
+
+    $scope.$on('RenamedPlaylist', function(event, playlist) {
+      for (var i = 0; i < $scope.playlists.length; i++) {
+        if ($scope.playlists[i].pid == playlist.pid) {
+          $scope.playlists[i].title = playlist.title;
+        }
+      }
+    });
+
+    $scope.onDrop = function($event,$song,playlist){
+      $http.post('/api/playlist/'+playlist.pid, $song).
         success(function(data) {
           $rootScope.$broadcast('UpdatedPlaylist', playlist.pid);
+        });
+    }
+    $scope.newDrop = function($event,$song){
+      $http.post('/api/playlist/'+$song.name, $song).
+        success(function(data) {
+          $scope.playlists.push({
+            pid: $song.name,
+            title: $song.name
+          });
+          $rootScope.$broadcast('NewPlaylist', playlist.pid);
         });
     }
   }).
@@ -81,6 +107,25 @@ angular.module('myApp.controllers', []).
               });
           }
         }
+        playlist.delete = function () {
+          $http.delete('/api/playlist/'+$scope.playlist.pid).
+            success(function(data) {
+              $rootScope.$broadcast('DeletedPlaylist', $scope.playlist.pid);
+              $scope.playlist = null;
+            });
+        }
+        playlist.renaming = function () {
+          $scope.renaming = 1;
+        }
+        $scope.$watch('inputRename', function() {
+          if ($scope.inputRename == null)
+            return;
+          $http.get('api/playlist/'+$scope.playlist.pid+'/rename/'+$scope.inputRename).
+            success(function(data) {
+              $scope.playlist.title = $scope.inputRename;
+              $rootScope.$broadcast('RenamedPlaylist', $scope.playlist);
+            });
+        });
         $scope.$on('UpdatedPlaylist', function(event, playlistId) {
           if ($scope.playlist != null && $scope.playlist.pid == playlistId) {
             $http.get('/api/playlist/'+playlistId).
@@ -89,12 +134,6 @@ angular.module('myApp.controllers', []).
               });
           }
         });
-        $scope.onDrop = function($event,$data,song){
-          console.log($data);
-          console.log(song);
-          console.log($scope.playlist.songs);
-        }
-
 
         $scope.playlist = playlist;
       });
@@ -119,7 +158,6 @@ angular.module('myApp.controllers', []).
     $scope.mode = 'repeat';
     $scope.volume = 100;
     $scope.$on('PlayPlaylist', function(event, message) {
-      //torrentclient.testDownload();
       $scope.playlist = message.playlist;
       $scope.currentSong == message.index ? playSong() : $scope.currentSong = message.index;
       $scope.isPaused = false;
@@ -132,6 +170,11 @@ angular.module('myApp.controllers', []).
           success(function(playlist) {
             $scope.playlist = playlist;
           });
+      }
+    });
+    $scope.$on('RenamedPlaylist', function(event, playlist) {
+      if ($scope.playlist.pid == playlist.pid) {
+        $scope.playlist.title = playlist.title;
       }
     });
 

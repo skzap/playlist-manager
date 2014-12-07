@@ -54,10 +54,12 @@ app.get('/partials/:name', routes.partials);
 // JSON API
 app.get('/api/playlists', api.playlists);
 app.get('/api/playlist/:id', api.playlist);
-app.get('/api/playlist/:id/swap/:songId', api.swap);
+app.delete('/api/playlist/:id', api.deletePlaylist);
 app.post('/api/playlist/:id', api.addSongToPlaylist);
-app.post('/api/playlist/addFromURL/:id', api.addSongToPlaylistFromURL);
+app.get('/api/playlist/:id/swap/:songId', api.swap);
+app.get('/api/playlist/:id/rename/:title', api.renamePlaylist);
 app.delete('/api/playlist/:id/:songid', api.deleteSongFromPlaylist);
+app.post('/api/playlist/addFromURL/:id', api.addSongToPlaylistFromURL);
 
 app.get('/api/search/library/:query', api.searchLibrary);
 app.get('/api/search/soundcloud/:query', api.searchSoundcloud);

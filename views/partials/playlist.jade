@@ -9,3 +9,9 @@ block playlistControls
     ul
       li
         a(href="/pl/{{playlist.pid}}/add") Add Song from URL
+      li
+        button(ng-show='renaming != 1', ng-click='playlist.renaming()') Rename playlist
+        input(type='text', ng-show='renaming == 1', ng-model='inputRename')
+      li
+        button(ng-click='playlist.delete()') Delete playlist
+      

@@ -73,8 +73,19 @@ exports.addSongToPlaylist = function (req, res) {
       data.playlists[i].songs.push(song);
       saveDatabase();
       res.json(true);
+      return;
     }
   }
+
+  // new playlist
+  var playlist = {
+    pid: song.name,
+    title: song.name,
+    songs: [song]
+  }
+  data.playlists.push(playlist);
+  saveDatabase();
+  res.json(true);
 };
 
 exports.addSongToPlaylistFromURL = function (req, res) {
@@ -152,6 +163,29 @@ exports.deleteSongFromPlaylist = function (req, res) {
     }
   }
 };
+
+exports.deletePlaylist = function (req, res) {
+  var pid = req.params.id;
+  for (var i = 0; i < data.playlists.length; i++) {
+    if (pid == data.playlists[i].pid){
+      data.playlists.splice(i, 1);
+      saveDatabase();
+      res.json(true);
+    }
+  }
+}
+
+exports.renamePlaylist = function (req, res) {
+  var pid = req.params.id;
+  //console.log(req);
+  for (var i = 0; i < data.playlists.length; i++) {
+    if (pid == data.playlists[i].pid){
+      data.playlists[i].title = req.params.title;
+      saveDatabase();
+      res.json(true);
+    }
+  }
+}
 
 exports.searchLibrary = function (req, res) {
   var query = req.params.query.toLowerCase();
