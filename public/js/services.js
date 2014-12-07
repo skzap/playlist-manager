@@ -54,7 +54,9 @@ angular.module('myApp.services', []).
       duration: 0,
       currentTime: 0,
       ended: false,
+      volume: 0,
       playUrl: function(scurl) {
+        console.log(this.isLoaded);
         if (this.isLoaded) {
           var options = {auto_play: true, buying: false};
           this.embedPlayer.load(scurl, options);
@@ -84,12 +86,14 @@ angular.module('myApp.services', []).
           });
           scplayer.embedPlayer.bind(SC.Widget.Events.PLAY_PROGRESS, function(object) {
             scplayer.currentTime = object.currentPosition/1000;
+            scplayer.setVolume(scplayer.volume);
           });
         });
         this.isLoaded = true;
         console.log('Soundcloud Player Loaded');
       },
       setVolume: function(volume) {
+        this.volume = volume;
         if (this.isLoaded)
           this.embedPlayer.setVolume(volume/100);
       }
