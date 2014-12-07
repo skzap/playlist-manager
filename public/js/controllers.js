@@ -148,6 +148,9 @@ angular.module('myApp.controllers', []).
       case 'repeatone':
         playSong();
         break;
+      case 'random':
+        $scope.currentSong = Math.floor(Math.random()*$scope.playlist.songs.length);
+        break;
       default:
       }
     };
@@ -162,6 +165,9 @@ angular.module('myApp.controllers', []).
         break;
       case 'repeatone':
         playSong();
+        break;
+      case 'random':
+        $scope.currentSong = $scope.previousSong;
         break;
       default:
       }
@@ -181,7 +187,8 @@ angular.module('myApp.controllers', []).
         ytplayer.embedPlayer.setSize($scope.videoWidth, videoHeight);
       }
     });
-    $scope.$watch('currentSong', function() {
+    $scope.$watch('currentSong', function(newSongIndex, oldSongIndex) {
+      $scope.previousSong = (oldSongIndex != null ? oldSongIndex : newSongIndex);
       playSong();
     });
     $scope.$watch('isPaused', function() {

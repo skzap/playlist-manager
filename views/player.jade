@@ -11,6 +11,7 @@ div(ng-controller='PlayerCtrl')
     select(ng-model='mode')
       option repeat
       option repeatone
+      option random
     div
       input(type='range', min='0', max='{{maxTime}}', ng-model="currentTime")
     div {{currentSongName}}
