@@ -1,8 +1,9 @@
 div(ng-controller='PlayerCtrl')
+  div(ng-show='getCurrentSong().type == \'youtube\'')#video
+    div#ytplayer
+  iframe(ng-show='getCurrentSong().type == \'soundcloud\'')#scplayer
+  //img#cover
   div(ng-show='playlist != null')#player
-    iframe(ng-show='getCurrentSong().type == \'youtube\'', src='http://www.youtube.com/embed/?enablejsapi=1&controls=0&showinfo=0&iv_load_policy=3&rel=3')#ytplayer
-    iframe(ng-show='getCurrentSong().type == \'soundcloud\'')#scplayer
-    //img#cover
     button(ng-click='prev()') Prev
     button(ng-click='isPaused = !isPaused') {{btnPlayText}}
     button(ng-click='next()') Next
@@ -15,4 +16,4 @@ div(ng-controller='PlayerCtrl')
     div {{currentSongName}}
     div {{displayTime}}
     div {{playlist.title}} {{1+currentSong.mod(playlist.songs.length)}}/{{playlist.songs.length}}
-    input(type='range', min='0', max='1080', ng-model="videoWidth")
+    input(type='range', min='0', max='1600', ng-model="videoWidth")

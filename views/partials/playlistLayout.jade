@@ -8,6 +8,6 @@ section
   ul
     li(ng-repeat='song in playlist.songs', ui-draggable='true', drag="song", ng-dblclick="playlist.playPlaylist($index)")
       button(ng-click='playlist.playPlaylist($index)') Play
-      {{song.type}} {{song.name}}
+      {{song.type}} {{song.name}} {{song.star}}
       block songControls
   block playlistControls

@@ -99,18 +99,20 @@ angular.module('myApp.services', []).
   factory('ytplayer', ['$window', '$rootScope', '$interval', function ($window, $rootScope, $interval) {
     var ytplayer = {
       embedPlayer: null,
-      videoId: null,
       isReady: false,
       isPaused: true,
+      isLoaded: false,
       duration: 0,
       currentTime: 0,
       ended: false,
-      loadPlayer: function () {
+      loadPlayer: function (id) {
         this.embedPlayer = new YT.Player('ytplayer', {
-          videoId: this.videoId,
+          videoId: id,
+          width: 355,
+          height: 200,
           events: {
-            onReady: onYoutubeReady,
-            onStateChange: onYoutubeStateChange
+            'onReady': onYoutubeReady,
+            'onStateChange': onYoutubeStateChange
           },
           playerVars: {
             controls: 0,
@@ -121,8 +123,12 @@ angular.module('myApp.services', []).
         });
       },
       loadVideoById: function(id) {
-        this.embedPlayer.loadVideoById(id);
-        this.currentTime = 0;
+        if (this.isLoaded)
+          this.embedPlayer.loadVideoById({
+            videoId: id
+          });
+        else
+          this.loadPlayer(id);
       },
       getDuration: function() {
         return this.embedPlayer.getDuration();
@@ -142,7 +148,7 @@ angular.module('myApp.services', []).
     $window.onYouTubeIframeAPIReady = function () {
       console.log('Youtube API is ready');
       ytplayer.isReady = true;
-      ytplayer.loadPlayer();
+      ytplayer.loadPlayer(null);
     };
     function onYoutubeStateChange (event) {
       if (event.data == YT.PlayerState.PLAYING) {
@@ -158,7 +164,7 @@ angular.module('myApp.services', []).
       $rootScope.$apply();
     }
     function onYoutubeReady (event) {
-      ytplayer.embedPlayer.setSize(355, 200);
+      ytplayer.isLoaded = true;
       console.log('Youtube player ready');
     }
     $interval(function () {

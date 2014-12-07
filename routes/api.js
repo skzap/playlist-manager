@@ -82,23 +82,46 @@ exports.addSongToPlaylistFromURL = function (req, res) {
   for (var i = 0; i < data.playlists.length; i++) {
     if (pid == data.playlists[i].pid){
       var playlistIndex = i;
+
       var myregexp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i;
       var regExResult = req.body.url.match(myregexp);
-      var videoId = regExResult[1];
-      var url = "http://gdata.youtube.com/feeds/api/videos/" + videoId + "?v=2&alt=json";
-      request(url, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          var videoTitle = JSON.parse(body).entry.title.$t;
-          var song = {
-            "type": "youtube",
-            "name": videoTitle,
-            "videoId": videoId
+      if (regExResult != null) {
+        // its a youtube url
+        var videoId = regExResult[1];
+        var url = "http://gdata.youtube.com/feeds/api/videos/" + videoId + "?v=2&alt=json";
+        request(url, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var videoTitle = JSON.parse(body).entry.title.$t;
+            var song = {
+              "type": "youtube",
+              "name": videoTitle,
+              "videoId": videoId
+            }
+            data.playlists[playlistIndex].songs.push(song);
+            saveDatabase();
+            res.json(true);
           }
-          data.playlists[playlistIndex].songs.push(song);
-          saveDatabase();
-          res.json(true);
-        }
-      });
+        });
+      }
+      else
+      {
+        // must be soundcloud then
+        console.log
+        var url = 'http://api.soundcloud.com/resolve.json?client_id=YOUR_CLIENT_ID&url='+req.body.url;
+        request(url, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var result = JSON.parse(body)
+            var song = {
+              "type": "soundcloud",
+              "name": result.title,
+              "url": result.permalink_url
+            }
+            data.playlists[playlistIndex].songs.push(song);
+            saveDatabase();
+            res.json(true);
+          }
+        });
+      }
     }
   }
 };
@@ -129,7 +152,9 @@ exports.deleteSongFromPlaylist = function (req, res) {
     }
   }
 };
-
+// exports.search.youtube
+// exports.search.soundcloud
+// exports.search.library
 exports.search = function (req, res) {
   // maybe split this in different calls so that data is served whenever its ready
   var query = req.params.query.toLowerCase();
@@ -155,6 +180,21 @@ exports.search = function (req, res) {
     }
   }
   // 2 - search 3rd parties (youtube,etc)
+  var url = "http://api.soundcloud.com/tracks.json?client_id=YOUR_CLIENT_ID&q=" + query;
+  request(url, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var results = JSON.parse(body);
+      for (var i = 0; i < results.length; i++) {
+        playlist.songs.push({
+          "type": "soundcloud",
+          "name": results[i].title,
+          "url": results[i].permalink_url
+        });
+      }
+    } else {
+      console.log(error);
+    }
+  });
   var url = "https://gdata.youtube.com/feeds/api/videos/?alt=json&q=" + query;
   request(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {

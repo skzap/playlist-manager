@@ -98,7 +98,6 @@ angular.module('myApp.controllers', []).
     ytplayer.insertScript();
     $scope.mode = 'repeat';
     $scope.volume = 100;
-    $scope.videoWidth = 355;
     $scope.$on('PlayPlaylist', function(event, message) {
       //torrentclient.testDownload();
       $scope.playlist = message.playlist;
