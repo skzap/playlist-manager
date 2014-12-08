@@ -79,7 +79,7 @@ exports.addSongToPlaylist = function (req, res) {
 
   // new playlist
   var playlist = {
-    pid: song.name,
+    pid: song.name.replace(' ','_').replace(/[^\w]/gi, ''),
     title: song.name,
     songs: [song]
   }

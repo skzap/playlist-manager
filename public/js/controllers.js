@@ -40,7 +40,7 @@ angular.module('myApp.controllers', []).
       $http.post('/api/playlist/'+$song.name, $song).
         success(function(data) {
           $scope.playlists.push({
-            pid: $song.name,
+            pid: $song.name.replace(' ','_').replace(/[^\w]/gi, ''),
             title: $song.name
           });
           $rootScope.$broadcast('NewPlaylist', playlist.pid);
