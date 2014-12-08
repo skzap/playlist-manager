@@ -1,20 +1,36 @@
-div(ng-controller='PlayerCtrl')
+div(ng-controller='PlayerCtrl')#player
   div(ng-show='getCurrentSong().type == \'youtube\'')#video
     div#ytplayer
   iframe(ng-show='getCurrentSong().type == \'soundcloud\'')#scplayer
   //img#cover
-  div(ng-show='playlist != null')#player
-    button(ng-click='prev()') Prev
-    button(ng-click='isPaused = !isPaused') {{btnPlayText}}
-    button(ng-click='next()') Next
-    input(type='range', min='0', max='100', ng-model="volume")
-    select(ng-model='mode')
-      option repeat
-      option repeatone
-      option random
-    div
-      input(type='range', min='0', max='{{maxTime}}', ng-model="currentTime")
-    div {{currentSongName}}
-    div {{displayTime}}
-    div {{playlist.title}} {{1+currentSong.mod(playlist.songs.length)}}/{{playlist.songs.length}}
-    input(type='range', min='0', max='1600', ng-model="videoWidth")
+  nav(class='navbar navbar-default navbar-fixed-top', role= 'navigation')
+    div(class='container-fluid')
+      div(class='row', ng-show='playlist != null')
+        div(class='col-md-3')
+          button(ng-click='prev()', class='btn btn-default')
+            i(class='fa fa-step-backward')
+          button(ng-show='isPaused', ng-click='isPaused = !isPaused', class='btn btn-default') 
+            i(class='fa fa-play')  {{btnPlayText}}
+          button(ng-show='!isPaused', ng-click='isPaused = !isPaused', class='btn btn-default') 
+            i(class='fa fa-pause')  {{btnPlayText}}
+          button(ng-click='next()', class='btn btn-default')
+            i(class='fa fa-step-forward')
+        div(class='col-md-3')  
+          div(class='range range-primary')
+            input(type='range', min='0', max='100', ng-model="volume")
+        div(class='col-md-3')
+          select(ng-model='mode', class='form-control')
+            option repeat
+            option repeatone
+            option random
+        div(class='col-md-3')
+          div(class='range range-primary')
+              input(type='range', min='0', max='1600', ng-model="videoWidth")
+      div(class='row', ng-show='playlist != null')
+        div(class='col-md-12')
+            {{currentSongName}} {{playlist.title}} {{1+currentSong.mod(playlist.songs.length)}}/{{playlist.songs.length}}
+      div(class='row', ng-show='playlist != null')
+        div(class='col-md-12')
+              div(ng-click='changeTime($event)', class='progress')
+                div(class='progress-bar', role='progressbar', aria-valuenow='{{currentTime}}', aria-valuemin='0', aria-valuemax='{{maxTime}}', style='width:{{100*currentTime/maxTime}}%')
+                  {{displayTime}}

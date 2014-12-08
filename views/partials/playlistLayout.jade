@@ -1,5 +1,5 @@
 section
-  button(ng-click='playlist.playPlaylist(0)') Play {{playlist.title}}
+  button(ng-click='playlist.playPlaylist(0)', class='btn btn-default') Play {{playlist.title}}
   div
     div(ng-switch='playlist.songs.length')
       div(ng-switch-when='0') 0 songs

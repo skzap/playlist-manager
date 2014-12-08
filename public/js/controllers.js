@@ -31,6 +31,7 @@ angular.module('myApp.controllers', []).
     });
 
     $scope.onDrop = function($event,$song,playlist){
+      console.log($song);
       $http.post('/api/playlist/'+playlist.pid, $song).
         success(function(data) {
           $rootScope.$broadcast('UpdatedPlaylist', playlist.pid);
@@ -223,6 +224,14 @@ angular.module('myApp.controllers', []).
       while (songIndex<0)
         songIndex += $scope.playlist.songs.length;
       return $scope.playlist.songs[songIndex];
+    };
+    $scope.changeTime = function($event) {
+      var position = $event.offsetX;
+      var maximum= $event.srcElement.offsetWidth;
+      if ($event.srcElement.classList[0] != 'progress')
+        maximum = $event.srcElement.parentNode.offsetWidth;
+
+      $scope.currentTime = $scope.maxTime*position/maximum;
     };
     $scope.$watch('videoWidth', function() {
       if ($scope.videoWidth != null && ytplayer.embedPlayer != null) {
