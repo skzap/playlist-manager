@@ -10,7 +10,6 @@ section
       tr(ng-repeat='song in playlist.songs', ui-draggable='true', drag="song", ng-dblclick="playlist.playPlaylist($index)")
         td {{song.type}}
         td {{song.name}}
-        td {{song.star}}
         td
           block songControls
   block playlistControls
