@@ -5,9 +5,12 @@ section
       div(ng-switch-when='0') 0 songs
       div(ng-switch-when='1') 1 song
       div(ng-switch-default) {{playlist.songs.length}} songs
-  ul
-    li(ng-repeat='song in playlist.songs', ui-draggable='true', drag="song", ng-dblclick="playlist.playPlaylist($index)")
-      button(ng-click='playlist.playPlaylist($index)') Play
-      {{song.type}} {{song.name}} {{song.star}}
-      block songControls
+  table(class='table table-hover')
+    tbody
+      tr(ng-repeat='song in playlist.songs', ui-draggable='true', drag="song", ng-dblclick="playlist.playPlaylist($index)")
+        td {{song.type}}
+        td {{song.name}}
+        td {{song.star}}
+        td
+          block songControls
   block playlistControls
