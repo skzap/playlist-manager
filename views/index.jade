@@ -2,8 +2,12 @@ extends layout
 
 block body
   include player.jade
-  include menu.jade
-  div(ng-view,class='container-fluid')
+  div(class='container-fluid')
+    div(class='row')
+      div(class='col-md-2')
+        include menu.jade
+      div(class='col-md-10')
+        div(ng-view)
   script(src='js/lib/angular.min.js')
   script(src='js/lib/angular-route.min.js')
   script(src='js/app.js')

@@ -1,6 +1,6 @@
-div(ng-controller='MenuCtrl',class='container-fluid')
-  input(ng-model='search', type='text', placeholder='Search songs ...', class='form-control')
-  ul(class='list-inline').menu
+div(ng-controller='MenuCtrl').menu
+  input(ng-model='search', type='text', placeholder='Search songs ...', class='form-control').search
+  ul.playlists
     li(ng-repeat='playlist in playlists', ui-on-Drop='onDrop($event,$data,playlist)')
       a(href='/pl/{{playlist.pid}}') {{playlist.title}}
     li(ui-on-Drop='newDrop($event,$data)') New playlist

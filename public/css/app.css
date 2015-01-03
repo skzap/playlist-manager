@@ -1,13 +1,26 @@
 /* app css stylesheet */
 
 .menu {
-  margin: 2em;
+  position: fixed;
+}
+.playlists {
+  white-space: nowrap;
+  list-style-type: none;
+  padding-left: 0px;
+  padding-top: 5px;
+}
+.search {
+  height: 30px;
+  font-size: 12px;
+  background-color: #272b30;
+  color: white;
 }
 
 #ytplayer {
   position: fixed;
   bottom: 0px;
   right: 0px;
+  z-index: 999;
 }
 
 #scplayer {
@@ -16,10 +29,11 @@
   right: 0px;
   width: 355px;
   height: 200px;
+  z-index: 999;
 }
 
 #player {
-  margin-bottom: 100px;
+  margin-bottom: 110px;
 }
 
 #cover {
