@@ -12,7 +12,7 @@ var data = require('../db.json');
 
 // building library
 data.library = [];
-readdirp({ root: path.join(__dirname, '../public/library'), fileFilter: '*.mp3' })
+readdirp({ root: path.join(__dirname, '../public/library'), fileFilter: ['*.mp3','*.m4a','*.ogg','*.wav'] })
   .on('warn', function (err) {
     console.error('something went wrong when processing an entry', err);
   })
@@ -21,17 +21,28 @@ readdirp({ root: path.join(__dirname, '../public/library'), fileFilter: '*.mp3' 
   })
   .on('data', function (entry) {
     var location = path.join(__dirname, '../public/library')+ '/' + entry.path;
-    id3({ file: location, type: id3.OPEN_LOCAL }, function(err, tags) {
-      if (err != undefined) console.log(location + ' Error:' + err);
-      var song = {
-        "path": entry.path,
-        "name": tags.artist + ' - ' + tags.title
-        // we could use "cover": tags.v2.image
-      }
-      song.name = song.name.replace(/\0/g, '');
-      data.library.push(song);
-      console.log(song.name + ' loaded (' + data.library.length + ' total)');
-    });
+    switch (entry.name.split('.').pop()) {
+      case 'mp3':
+        id3({ file: location, type: id3.OPEN_LOCAL }, function(err, tags) {
+          if (err != undefined) console.log(location + ' Error:' + err);
+          var song = {
+            "path": entry.path,
+            "name": tags.artist + ' - ' + tags.title
+          }
+          song.name = song.name.replace(/\0/g, '');
+          data.library.push(song);
+          console.log(song.name + ' loaded (' + data.library.length + ' total)');
+        });
+        break;
+      default:
+        var song = {
+          "path": entry.path,
+          "name": entry.path
+        }
+        song.name = song.name.replace(/\0/g, '');
+        data.library.push(song);
+        console.log(song.name + ' loaded (' + data.library.length + ' total)');
+    }
   });
 
 function saveDatabase() {
